@@ -1,0 +1,204 @@
+/* ===================================================
+   vikunja-tui  ·  GitHub Dark theme
+   =================================================== */
+
+Screen {
+    background: #0d1117;
+}
+
+Header {
+    background: #161b22;
+    color: #58a6ff;
+    text-style: bold;
+    dock: top;
+}
+
+Footer {
+    background: #161b22;
+    color: #6e7681;
+    dock: bottom;
+}
+
+/* --- Dashboard ----------------------------------------- */
+
+#dashboard_container {
+    width: 100%;
+    height: 100%;
+    align: center middle;
+    background: #0d1117;
+}
+
+.dashboard_logo {
+    width: 64;
+    text-align: center;
+    color: #58a6ff;
+    text-style: bold;
+    padding: 1 0;
+}
+
+#project_tree {
+    width: 64;
+    height: auto;
+    max-height: 80%;
+    background: #161b22;
+    border: round #30363d;
+    padding: 1 2;
+    margin: 0;
+}
+
+Tree > .tree--cursor {
+    background: #1f6feb 60%;
+    color: #e6edf3;
+    text-style: bold;
+}
+
+/* --- Board layout -------------------------------------- */
+
+#board {
+    height: 1fr;
+    width: 100%;
+    overflow-x: auto;
+    background: #0d1117;
+    padding: 0 1;
+}
+
+#loading {
+    width: 100%;
+    height: 1fr;
+    color: #388bfd;
+}
+
+/* --- Bucket column ------------------------------------- */
+
+.list_col {
+    width: 1fr;
+    min-width: 20;
+    height: 100%;
+    margin: 0 1 0 0;
+    padding: 0;
+    background: #161b22;
+    border: tall #21262d;
+    scrollbar-size: 1 1;
+    scrollbar-color: #21262d;
+    scrollbar-color-hover: #388bfd;
+}
+
+.list_col:focus-within {
+    border: tall #388bfd;
+}
+
+/* --- Bucket header ------------------------------------- */
+
+.list_header {
+    width: 100%;
+    height: 1;
+    padding: 0 1;
+    background: #21262d;
+    color: #c9d1d9;
+    text-style: bold;
+    overflow: hidden;
+}
+
+.list_col:focus-within .list_header {
+    background: #1f3a6e;
+    color: #79c0ff;
+}
+
+/* --- Tasks --------------------------------------------- */
+
+.card {
+    width: 100%;
+    height: 1;
+    min-height: 1;
+    max-height: 1;
+    padding: 0 2;
+    color: #8b949e;
+    background: transparent;
+    overflow: hidden hidden;
+}
+
+.card:hover {
+    color: #c9d1d9;
+    background: #1c2128;
+}
+
+.card:focus {
+    color: #e6edf3;
+    background: #1a2744;
+    text-style: bold;
+}
+
+/* --- Modals -------------------------------------------- */
+
+ModalScreen {
+    align: center middle;
+    background: #010409 80%;
+}
+
+.modal_box {
+    width: 60;
+    max-width: 85%;
+    height: auto;
+    padding: 1 2 2 2;
+    background: #161b22;
+    border: round #388bfd;
+}
+
+.detail_box {
+    width: 76;
+    max-height: 70%;
+}
+
+.modal_title {
+    width: 100%;
+    text-align: center;
+    color: #e6edf3;
+    text-style: bold;
+    padding: 0 0 1 0;
+    border-bottom: solid #21262d;
+    margin-bottom: 1;
+}
+
+.modal_body {
+    width: 100%;
+    height: auto;
+    max-height: 24;
+    overflow-y: auto;
+    color: #8b949e;
+    padding: 0 0 1 0;
+    scrollbar-color: #30363d;
+}
+
+.modal_input {
+    margin: 1 0;
+    border: round #30363d;
+    background: #0d1117;
+    color: #e6edf3;
+}
+
+.modal_input:focus {
+    border: round #388bfd;
+}
+
+.modal_row {
+    width: 100%;
+    height: auto;
+    align: center middle;
+    margin-top: 1;
+}
+
+.modal_row Button {
+    margin: 0 1;
+    min-width: 12;
+}
+
+Input {
+    border: round #30363d;
+    background: #0d1117;
+    color: #e6edf3;
+    margin: 1 0;
+}
+
+Input:focus {
+    border: round #388bfd;
+}
