@@ -125,7 +125,10 @@ class TaskWidget(Widget):
         title = _one_line(self.vtask.title)
         bullet = "\u25b6 " if self.has_focus else "\u00b7 "
         avail = max(4, (self.size.width or 38) - 4)
-        t = Text(bullet + title, no_wrap=True, overflow="ellipsis")
+        if self.vtask.done:
+            t = Text(bullet + title, no_wrap=True, overflow="ellipsis", style="strike dim")
+        else:
+            t = Text(bullet + title, no_wrap=True, overflow="ellipsis")
         t.truncate(avail, overflow="ellipsis")
         return t
 
@@ -279,7 +282,7 @@ class BoardScreen(Screen):
         ("a", "add_task", "+ Task"),
         ("d", "delete_task", "Delete"),
         ("D", "clear_bucket", "Clear Bucket"),
-        ("c", "mark_done", "\u2713 Done"),
+        ("c", "mark_done", "\u2713 Toggle Done"),
         ("enter", "view_details", "Details"),
         ("r", "reload", "Reload"),
     ]
@@ -413,17 +416,14 @@ class BoardScreen(Screen):
             self.notify("No task selected.", severity="warning")
             return
 
-        if tw.vtask.done:
-            self.notify("Task is already done.")
-            return
-
         try:
-            col = tw.parent
-            tw.vtask.mark_done()
-            tw.remove()
-            if isinstance(col, BucketColumn):
-                col.refresh_header()
-            self.notify("Marked as done.")
+            new_state = not tw.vtask.done
+            tw.vtask.update(done=new_state)
+            tw.refresh()
+            if new_state:
+                self.notify("Marked as done.")
+            else:
+                self.notify("Marked as not done.")
         except Exception as ex:
             self.notify(f"Error: {ex}", severity="error")
 

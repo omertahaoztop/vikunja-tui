@@ -253,9 +253,7 @@ class VikunjaAPI:
             buckets = []
             for b in items:
                 raw_tasks = b.get("tasks") or []
-                task_objs = [
-                    Task(t, self._routes) for t in raw_tasks if not t.get("done")
-                ]
+                task_objs = [Task(t, self._routes) for t in raw_tasks]
                 buckets.append(Bucket(b, task_objs, self._routes))
             return buckets
 
@@ -277,23 +275,7 @@ class VikunjaAPI:
         for b in raw_buckets:
             bid = b["id"]
             raw_tasks = tasks_by_bucket.get(bid, [])
-            task_objs = [Task(t, self._routes) for t in raw_tasks if not t.get("done")]
-            buckets.append(Bucket(b, task_objs, self._routes))
-
-        return buckets
-
-        # Shape B / C -- need explicit bucket list
-        raw_buckets = self._routes.get(
-            f"/projects/{project_id}/views/{view_id}/buckets"
-        )
-        if not isinstance(raw_buckets, list):
-            raw_buckets = []
-
-        buckets = []
-        for b in raw_buckets:
-            bid = b["id"]
-            raw_tasks = tasks_by_bucket.get(bid, [])
-            task_objs = [Task(t, self._routes) for t in raw_tasks if not t.get("done")]
+            task_objs = [Task(t, self._routes) for t in raw_tasks]
             buckets.append(Bucket(b, task_objs, self._routes))
 
         return buckets
