@@ -25,6 +25,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install textual python-dotenv pyinstaller certifi
 
+      - name: Inject version
+        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${GITHUB_REF_NAME}\"/" main.py
+
       - name: Build binary
         run: |
           pyinstaller --onefile --name vikunja-tui-linux-amd64 \

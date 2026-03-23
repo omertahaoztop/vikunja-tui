@@ -122,6 +122,18 @@ vikunja-tui
 python main.py
 ```
 
+### Updating
+
+```bash
+vikunja-tui --upgrade
+```
+
+If installed system-wide:
+
+```bash
+sudo vikunja-tui --upgrade
+```
+
 ### Key Bindings
 
 | Key | Action |

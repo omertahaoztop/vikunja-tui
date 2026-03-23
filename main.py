@@ -1,5 +1,8 @@
 import os
 import ssl
+import sys
+
+__version__ = "dev"
 
 # SSL certificate paths to try (in order)
 _CERT_PATHS = [
@@ -133,5 +136,15 @@ class VikunjaApp(App):
 
 
 if __name__ == "__main__":
+    if "--version" in sys.argv:
+        print(f"vikunja-tui {__version__}")
+        sys.exit(0)
+
+    if "--upgrade" in sys.argv:
+        from upgrade import self_upgrade
+
+        self_upgrade(__version__)
+        sys.exit(0)
+
     app = VikunjaApp()
     app.run()
