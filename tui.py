@@ -287,10 +287,13 @@ class BoardScreen(Screen):
         ("r", "reload", "Reload"),
     ]
 
+    SYNC_INTERVAL = 5
+
     def __init__(self, project, **kwargs):
         super().__init__(**kwargs)
         self._project = project
         self._buckets: list = []
+        self._sync_timer = None
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -300,6 +303,52 @@ class BoardScreen(Screen):
 
     def on_mount(self) -> None:
         self._fetch()
+        self._sync_timer = self.set_interval(self.SYNC_INTERVAL, self._sync)
+
+    def on_unmount(self) -> None:
+        if self._sync_timer:
+            self._sync_timer.stop()
+
+    @work(thread=True)
+    def _sync(self) -> None:
+        try:
+            buckets = VikunjaClient.get_instance().load_project_board(self._project)
+            self.app.call_from_thread(self._apply_sync, buckets)
+        except Exception:
+            pass
+
+    def _apply_sync(self, buckets) -> None:
+        self._buckets = buckets
+        container = self.query_one("#board", Horizontal)
+        focused = self.app.focused
+        focused_task_id = None
+        focused_bucket_title = None
+        if isinstance(focused, TaskWidget):
+            focused_task_id = focused.vtask._data.get("id")
+            if isinstance(focused.parent, BucketColumn):
+                focused_bucket_title = focused.parent.bucket.title
+        elif isinstance(focused, BucketColumn):
+            focused_bucket_title = focused.bucket.title
+
+        container.remove_children()
+        for bucket in buckets:
+            if bucket.title:
+                container.mount(BucketColumn(bucket, classes="list_col"))
+
+        if focused_task_id or focused_bucket_title:
+            self.call_later(self._restore_focus, focused_task_id, focused_bucket_title)
+
+    def _restore_focus(self, task_id, bucket_title) -> None:
+        if task_id:
+            for tw in self.query(TaskWidget):
+                if tw.vtask._data.get("id") == task_id:
+                    tw.focus()
+                    return
+        if bucket_title:
+            for col in self.query(BucketColumn):
+                if col.bucket.title == bucket_title:
+                    col.focus()
+                    return
 
     @work(thread=True)
     def _fetch(self) -> None:
@@ -419,6 +468,30 @@ class BoardScreen(Screen):
         try:
             new_state = not tw.vtask.done
             tw.vtask.update(done=new_state)
+
+            target_bucket_id = (
+                self._project._data.get("_done_bucket_id")
+                if new_state
+                else self._project._data.get("_default_bucket_id")
+            )
+
+            if target_bucket_id:
+                src_col = tw.parent
+                target_col = None
+                for col in self.query(BucketColumn):
+                    if col.bucket._data["id"] == target_bucket_id:
+                        target_col = col
+                        break
+
+                if target_col and isinstance(src_col, BucketColumn) and src_col is not target_col:
+                    tw.remove()
+                    target_col.mount(TaskWidget(tw.vtask, classes="card"))
+                    self.call_later(src_col.refresh_header)
+                    self.call_later(target_col.refresh_header)
+                    label = target_col.bucket.title or "bucket"
+                    self.notify(f"Moved to {label}.")
+                    return
+
             tw.refresh()
             if new_state:
                 self.notify("Marked as done.")
