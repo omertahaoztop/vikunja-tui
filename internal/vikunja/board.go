@@ -51,8 +51,8 @@ func (c *Client) CreateTask(p *Project, bucketID int64, title string) (Task, err
 	}
 	if created.ID != 0 && p.ViewID != 0 {
 		_ = c.post(
-			fmt.Sprintf("/projects/%d/views/%d/buckets/%d", p.ID, p.ViewID, bucketID),
-			map[string]any{"task_id": created.ID},
+			fmt.Sprintf("/projects/%d/views/%d/buckets/%d/tasks", p.ID, p.ViewID, bucketID),
+			map[string]any{"task_id": created.ID, "bucket_id": bucketID, "project_view_id": p.ViewID},
 			nil,
 		)
 	}
@@ -69,4 +69,18 @@ func (c *Client) UpdateTask(t Task) (Task, error) {
 
 func (c *Client) DeleteTask(id int64) error {
 	return c.del(fmt.Sprintf("/tasks/%d", id))
+}
+
+// MoveTaskToBucket assigns a task to a bucket via the kanban view-level
+// endpoint. Setting bucket_id on the task alone does not move it in the
+// kanban view, so this mirrors what CreateTask does after creation.
+func (c *Client) MoveTaskToBucket(p *Project, taskID, bucketID int64) error {
+	if p.ViewID == 0 {
+		return fmt.Errorf("no kanban view id for project %d", p.ID)
+	}
+	return c.post(
+		fmt.Sprintf("/projects/%d/views/%d/buckets/%d/tasks", p.ID, p.ViewID, bucketID),
+		map[string]any{"task_id": taskID, "bucket_id": bucketID, "project_view_id": p.ViewID},
+		nil,
+	)
 }

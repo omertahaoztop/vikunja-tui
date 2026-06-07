@@ -33,7 +33,12 @@ const (
 // ---- messages -------------------------------------------------------------
 
 type projectsMsg struct{ projects []vikunja.Project }
-type boardMsg struct{ buckets []vikunja.Bucket }
+type boardMsg struct {
+	buckets         []vikunja.Bucket
+	viewID          int64
+	doneBucketID    int64
+	defaultBucketID int64
+}
 type taskCreatedMsg struct{ task vikunja.Task }
 type taskUpdatedMsg struct{}
 type taskDeletedMsg struct{}
@@ -109,7 +114,7 @@ func (m Model) loadBoard() tea.Cmd {
 		if err != nil {
 			return errMsg{"Failed to load board: " + err.Error()}
 		}
-		return boardMsg{buckets}
+		return boardMsg{buckets, p.ViewID, p.DoneBucketID, p.DefaultBucketID}
 	}
 }
 
@@ -122,7 +127,7 @@ func (m Model) syncBoard() tea.Cmd {
 		if err != nil {
 			return nil
 		}
-		return boardMsg{buckets}
+		return boardMsg{buckets, p.ViewID, p.DoneBucketID, p.DefaultBucketID}
 	}
 }
 
@@ -177,6 +182,17 @@ func (m Model) updateTask(t vikunja.Task) tea.Cmd {
 	}
 }
 
+func (m Model) moveTaskCmd(taskID, bucketID int64) tea.Cmd {
+	c := m.client
+	p := m.current
+	return func() tea.Msg {
+		if err := c.MoveTaskToBucket(&p, taskID, bucketID); err != nil {
+			return errMsg{"Move failed: " + err.Error()}
+		}
+		return taskUpdatedMsg{}
+	}
+}
+
 // ---- update ---------------------------------------------------------------
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -195,6 +211,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case boardMsg:
 		m.loading = false
+		m.current.ViewID = msg.viewID
+		m.current.DoneBucketID = msg.doneBucketID
+		m.current.DefaultBucketID = msg.defaultBucketID
 		m.board.update(msg.buckets)
 		return m, nil
 
@@ -519,9 +538,8 @@ func (m Model) moveTask(dir int) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	dest := m.board.buckets[target]
-	t.BucketID = dest.ID
 	m.notify("Moved to "+dest.Title+".", notifInfo)
-	return m, m.updateTask(t)
+	return m, m.moveTaskCmd(t.ID, dest.ID)
 }
 
 func (m Model) cycleTheme() (tea.Model, tea.Cmd) {
