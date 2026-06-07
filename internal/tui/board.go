@@ -169,22 +169,38 @@ func (b board) view(th Theme, width, height int, loading bool) string {
 		return lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, msg)
 	}
 
-	n := len(b.buckets)
+	colW := 28
 	gap := 1
-	colW := (width - (n-1)*gap) / n
-	if colW < 18 {
-		colW = 18
-	}
-	if colW > 42 {
-		colW = 42
-	}
 	innerW := colW - 4
 	if innerW < 8 {
 		innerW = 8
 	}
 
+	// How many columns fit; window them around the focused bucket so
+	// off-screen buckets stay reachable (horizontal scroll).
+	visibleCols := (width + gap) / (colW + gap)
+	if visibleCols < 1 {
+		visibleCols = 1
+	}
+	n := len(b.buckets)
+	if visibleCols > n {
+		visibleCols = n
+	}
+	start := 0
+	if b.selBucket >= visibleCols {
+		start = b.selBucket - visibleCols + 1
+	}
+	if start > n-visibleCols {
+		start = n - visibleCols
+	}
+	if start < 0 {
+		start = 0
+	}
+	end := start + visibleCols
+
 	var cols []string
-	for i, bk := range b.buckets {
+	for i := start; i < end; i++ {
+		bk := b.buckets[i]
 		tasks := b.visibleTasks(i)
 		focused := i == b.selBucket
 
@@ -231,7 +247,12 @@ func (b board) view(th Theme, width, height int, loading bool) string {
 		cols = append(cols, colStyle.Width(colW).Height(height-2).Render(body))
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Top, cols...)
+	row := lipgloss.JoinHorizontal(lipgloss.Top, cols...)
+	if start > 0 || end < n {
+		ind := th.Card.Render(fmt.Sprintf("  buckets %d-%d of %d  ‹ › to scroll", start+1, end, n))
+		return lipgloss.JoinVertical(lipgloss.Left, row, ind)
+	}
+	return row
 }
 
 func truncate(s string, max int) string {

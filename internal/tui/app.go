@@ -204,6 +204,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		return m.handleKey(msg)
 
+	case tea.MouseWheelMsg:
+		if m.modal != nil || m.search || m.help {
+			return m, nil
+		}
+		up := msg.Button == tea.MouseWheelUp
+		switch m.screen {
+		case screenDashboard:
+			if up {
+				m.dashboard.prev()
+			} else {
+				m.dashboard.next()
+			}
+		default:
+			if up {
+				m.board.prevTask()
+			} else {
+				m.board.nextTask()
+			}
+		}
+		return m, nil
+
 	case projectsMsg:
 		m.loading = false
 		m.dashboard.populate(msg.projects)
