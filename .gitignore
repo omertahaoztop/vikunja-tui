@@ -1,8 +1,14 @@
 .env
-.venv/
-__pycache__/
-*.pyc
-*.spec
 .DS_Store
 build/
 dist/
+
+# Go
+/vikunja-tui
+/vikunja-tui-linux-amd64
+*.test
+*.out
+vendor/
+
+# Tooling
+.opencode/

@@ -15,33 +15,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install textual python-dotenv pyinstaller certifi
-
-      - name: Inject version
-        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${GITHUB_REF_NAME}\"/" main.py
+          go-version: "1.23"
+          cache: true
 
       - name: Build binary
+        env:
+          CGO_ENABLED: "0"
+          GOOS: linux
+          GOARCH: amd64
         run: |
-          pyinstaller --onefile --name vikunja-tui-linux-amd64 \
-            --add-data "tui.css:." \
-            --collect-data certifi \
-            main.py
+          go build -trimpath \
+            -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
+            -o vikunja-tui-linux-amd64 .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: vikunja-tui-linux-amd64
-          path: dist/vikunja-tui-linux-amd64
+          path: vikunja-tui-linux-amd64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/vikunja-tui-linux-amd64
+          files: vikunja-tui-linux-amd64

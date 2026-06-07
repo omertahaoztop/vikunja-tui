@@ -1,17 +1,27 @@
 # Vikunja TUI
 
-A Textual-based Terminal User Interface (TUI) for [Vikunja](https://vikunja.io), the open-source to-do app.
+A Bubble Tea-based Terminal User Interface (TUI) for [Vikunja](https://vikunja.io), the open-source to-do app.
 
 ## Features
 
--   **Dashboard**: View and select from your available projects.
+-   **Dashboard**: View and select from your available projects (with nested project support).
 -   **Kanban View**: Interact with your project buckets and tasks.
 -   **Task Management**:
     -   Create new tasks.
+    -   Edit task title and description.
     -   View task details.
-    -   Mark tasks as done.
+    -   Mark tasks as done / not done.
+    -   Move tasks between buckets.
     -   Delete tasks.
--   **Keyboard Navigation**: Full keyboard support for navigating projects, buckets, and tasks.
+    -   Clear entire buckets.
+-   **Search / Filter**: Live in-board task filtering (`/`).
+-   **Task Badges**: Priority, due date, and label chips on each card.
+-   **Themes**: Cycle through GitHub Dark, Dracula, Nord, and Gruvbox (`t`).
+-   **Help Overlay**: Full keybinding reference on demand (`?`).
+-   **Mouse Support**: Cell-motion mouse tracking.
+-   **Auto-sync**: Board refreshes every 5 seconds.
+-   **Keyboard Navigation**: Full keyboard support with vim-style bindings.
+-   **Self-upgrade**: Update to latest release with `--upgrade`.
 
 ## Installation
 
@@ -48,15 +58,10 @@ vikunja-tui
     cd vikunja-tui
     ```
 
-2.  Create and activate a virtual environment:
+2.  Build the binary:
     ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-    ```
-
-3.  Install dependencies:
-    ```bash
-    pip install textual python-dotenv
+    go build -o vikunja-tui .
+    ./vikunja-tui
     ```
 
 ## Configuration
@@ -119,7 +124,7 @@ vikunja-tui
 ### From source
 
 ```bash
-python main.py
+go build -o vikunja-tui . && ./vikunja-tui
 ```
 
 ### Updating
@@ -143,12 +148,25 @@ sudo vikunja-tui --upgrade
 | `Down` | Next Task |
 | `Up` | Previous Task |
 | `a` | Add Task |
+| `e` | Edit Task |
 | `d` | Delete Task |
 | `D` (Shift+D) | Clear Bucket (delete all tasks) |
-| `c` | Mark Task as Done |
+| `c` | Toggle Done |
+| `<` / `>` | Move Task to Prev / Next Bucket |
+| `/` | Search / Filter |
+| `t` | Cycle Theme |
+| `?` | Help Overlay |
 | `Enter` | View Task Details |
+| `r` | Reload Board |
 | `Esc` | Back / Cancel |
+| `q` | Quit |
 
+## Tech Stack
+
+- **[Go](https://go.dev/)** — Compiled, statically-linked language
+- **[Bubble Tea](https://github.com/charmbracelet/bubbletea)** — Terminal UI framework (Elm architecture)
+- **[Bubbles](https://github.com/charmbracelet/bubbles)** — TUI components (text input, text area)
+- **[Lip Gloss](https://github.com/charmbracelet/lipgloss)** — Style and layout
 ## Disclaimer
 
 This project is created for **personal and educational purposes only**. It is not affiliated with, endorsed by, or directly supported by the official Vikunja project. Use at your own risk.
